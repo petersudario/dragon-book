@@ -34,7 +34,19 @@ composer install
 npm install
 ```
 
-### 4. Inicie o container do Docker. Após a build, inicie o terminal do container "app".
+### 4. Copie e renomeie o arquivo ".env.example" para ".env" na root do projeto e altere as seguintes linhas para as configurações necessárias:
+
+```bash
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=root
+```
+
+
+### 5. Inicie o container do Docker. Após a build, inicie o terminal do container "app".
 
 ```bash
 docker-compose up -d --build
@@ -42,14 +54,14 @@ docker-compose exec app bash
 ```
 
 
-### 5. Realize os seguintes comandos do artisan:
+### 6. Realize os seguintes comandos do artisan:
 
 ```bash
 php artisan key:generate
 php artisan migrate
 ```
 
-### 6. Inicie o artisan e abra a aplicação no navegador: http://localhost:8000.
+### 7. Inicie o artisan e abra a aplicação no navegador: http://localhost:8000.
 
 ```bash
 php artisan serve --host=0.0.0.0 --port=8000
