@@ -5,47 +5,27 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Register() {
+export default function Login() {
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
         email: '',
         password: '',
-        password_confirmation: '',
+        remember: false,
     });
+
 
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
+        post(route('login'), {
+            onFinish: () => reset('password'),
         });
     };
 
     return (
         <GuestLayout>
-            <Head title="Register" />
+            <Head title="Login" />
 
             <form onSubmit={submit} className="bg-white p-8 shadow-md rounded-lg">
-                <div>
-                    <InputLabel
-                        htmlFor="name"
-                        value="Name"
-                        className="text-orange-600"
-                    />
-
-                    <TextInput
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        className="mt-1 block w-full border-orange-300 focus:border-orange-500 focus:ring-orange-500"
-                        autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.name} className="mt-2 text-orange-600" />
-                </div>
 
                 <div className="mt-4">
                     <InputLabel
@@ -89,40 +69,18 @@ export default function Register() {
                     <InputError message={errors.password} className="mt-2 text-orange-600" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                        className="text-orange-600"
-                    />
-
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full border-orange-300 focus:border-orange-500 focus:ring-orange-500"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.password_confirmation} className="mt-2 text-orange-600" />
-                </div>
-
                 <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
+                <Link
+                        href={route('register')}
                         className="rounded-md text-sm text-orange-600 underline hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                     >
-                        Already registered?
+                        Not registered?
                     </Link>
-
                     <PrimaryButton
                         className="ms-4 bg-orange-600 text-white hover:bg-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                         disabled={processing}
                     >
-                        Register
+                        Login
                     </PrimaryButton>
                 </div>
             </form>
