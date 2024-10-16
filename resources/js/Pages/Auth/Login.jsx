@@ -70,7 +70,7 @@ export default function Login() {
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
-                <Link
+                    <Link
                         href={route('register')}
                         className="rounded-md text-sm text-orange-600 underline hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                     >
