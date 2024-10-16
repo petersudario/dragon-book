@@ -4,10 +4,13 @@ import { Link } from '@inertiajs/react';
 export default function GuestLayout({ children }) {
     return (
         <div className="flex min-h-screen flex-col items-center bg-gradient-to-b from-orange-500 to-orange-700 pt-6 sm:justify-center sm:pt-0">
-            <div>
-                <Link className="flex gap-2 items-center justify-center" href="/">
-                    <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
-                </Link>
+            <div className='grid justify-items-center'>
+                <div className='flex items-center w-36 h-36'>
+                    <Link href="/">
+                        <ApplicationLogo />
+                    </Link>
+                </div>
+
                 <h1 className="text-4xl font-bold text-white">
                     Dragon Book
                 </h1>
