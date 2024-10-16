@@ -1,53 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import axios from 'axios';
+
 
 const mapContainerStyle = {
   width: '100%',
-  height: '400px',
+  height: '100vh',
 };
+
 
 const defaultCenter = {
-  lat: -23.55052,
-  lng: -46.633308,
+  lat: 0, // Equador
+  lng: 0, // Linha de Longitude de Greenwich
 };
 
-const Map = ({ address }) => {
-  const [coordinates, setCoordinates] = useState(defaultCenter);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const fetchCoordinates = async () => {
-      const fullAddress = `${address.logradouro}, ${address.bairro}, ${address.localidade}, ${address.uf}`;
+const globalBounds = {
+  north: 85,
+  south: -85,
+  west: -180,
+  east: 180,
+};
 
-      try {
-        const response = await axios.post('/api/v1/geocode', { address: fullAddress });
-        setCoordinates(response.data);
-      } catch (err) {
-        console.error('Erro ao obter coordenadas:', err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
+const mapOptions = {
+  maxZoom: 18,
+  minZoom: 5, 
+  restriction: {
+    latLngBounds: globalBounds, 
+    strictBounds: true,        
+  },
+  disableDefaultUI: false,
+};
 
-    if (address) {
-      fetchCoordinates();
-    }
-  }, [address]);
-
-  if (loading) return <p>Carregando mapa...</p>;
-  if (error) return <p>Erro ao carregar o mapa.</p>;
-
+/**
+ * Componente de Mapa.
+ *
+ * @param {Object} props
+ * @param {Object} props.center - Coordenadas para centralizar o mapa.
+ * @returns JSX.Element
+ */
+const Map = ({ center }) => {
   return (
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
-        center={coordinates}
+        center={center || defaultCenter}
         zoom={15}
+        options={mapOptions}
       >
-        <Marker position={coordinates} />
+        <Marker position={center || defaultCenter} />
       </GoogleMap>
     </LoadScript>
   );

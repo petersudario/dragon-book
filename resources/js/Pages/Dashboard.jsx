@@ -1,25 +1,26 @@
-import AddressForm from '@/Components/ViaCep/AddressForm';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Map from '@/Components/Map';
 import { Head } from '@inertiajs/react';
+import useGeolocation from '@/hook/UseGeolocation';
 
 export default function Dashboard() {
+    const { location, error } = useGeolocation();
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title="Dashboard" />
-
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <AddressForm />
+            {error && <p className="error">Erro de geolocalização: {error}</p>}
+            <div className='h-screen'>
+                {location ? (
+                    <div className="map-container">
+                        <Map center={location} />
                     </div>
-                </div>
+                ) : (
+                    <div className="map-container">
+                        <Map />
+                    </div>
+                )}
             </div>
+
         </AuthenticatedLayout>
     );
 }
