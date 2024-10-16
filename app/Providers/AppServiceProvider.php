@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\GoogleMapsService;
+use App\Services\ViaCepService;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
