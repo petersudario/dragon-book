@@ -20,6 +20,10 @@
         "vite": "^5.0"
     },
     "dependencies": {
-        "@react-google-maps/api": "^2.20.3"
+        "@react-google-maps/api": "^2.20.3",
+        "lodash": "^4.17.21",
+        "react-helmet": "^6.1.0",
+        "react-input-mask": "^2.0.4",
+        "react-toastify": "^10.0.6"
     }
 }
