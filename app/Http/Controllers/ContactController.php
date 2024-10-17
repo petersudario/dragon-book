@@ -11,16 +11,27 @@ use Illuminate\Support\Facades\Auth;
 class ContactController extends Controller
 {
     /**
-     * Lista os contatos do usuário.
+     * Lista os contatos do usuário, com opção de filtro por nome ou CPF.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $contacts = Auth::user()->contacts()->get();
-
-        return Inertia::render('Dashboard', [
+        $query = Auth::user()->contacts();
+    
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nome', 'like', "%{$search}%")
+                  ->orWhere('cpf', 'like', "%{$search}%");
+            });
+        }
+    
+        $contacts = $query->get();
+    
+        return response()->json([
             'contacts' => $contacts,
+            'search' => $search ?? '',
         ]);
     }
+    
 
     /**
      * Armazena um novo contato.
@@ -41,5 +52,4 @@ class ContactController extends Controller
     
         return redirect()->back()->with('success', 'Contato criado com sucesso!');
     }
-    
 }
