@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import axios from 'axios';
 
 /**
@@ -16,19 +16,23 @@ const useGoogleGeocoding = (googleApiKey) => {
      *
      * @param {string} address - O endereço completo para geocodificação.
      */
-    const fetchCoordinates = async (address) => {
+    const fetchCoordinates = useCallback(async (address) => {
         try {
-            const response = await axios.post('/geocode', { address });
-            setCoordinates({
-                longitude: response.data.longitude,
-                latitude: response.data.latitude
-            })
+            const response = await axios.post('/geocode', {
+                address                }
+            );
 
+            setCoordinates({
+                latitude: response.data.latitude,
+                longitude: response.data.longitude
+            });
+            setError(null);
         } catch (error) {
             console.error('Erro ao buscar coordenadas:', error);
+            setCoordinates({ latitude: '', longitude: '' });
+            setError(error.message || 'Erro ao buscar coordenadas.');
         }
-    };
-    
+    }, [googleApiKey]); // Depende da chave da API
 
     return { coordinates, fetchCoordinates, error };
 };

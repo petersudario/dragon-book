@@ -1,10 +1,12 @@
+// resources/js/Components/EditContactForm.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import InputMask from 'react-input-mask'; 
+import { toast } from 'react-toastify';
 import useViaCep from '@/hooks/useViaCep';
 import useGoogleGeocoding from '@/hooks/useGoogleGeocoding';
-import InputMask from 'react-input-mask'; 
 
-export default function AddContactForm ({ onCancel, onAddContact }) {
+export default function EditContactForm({ contact, onCancel, onUpdateContact }) {
     const [formData, setFormData] = useState({
         nome: '',
         cpf: '',
@@ -19,32 +21,69 @@ export default function AddContactForm ({ onCancel, onAddContact }) {
     const [loading, setLoading] = useState(false);
 
     const { address, fetchAddress, error: cepError } = useViaCep();
-    const { coordinates, fetchCoordinates, error: geoError } = useGoogleGeocoding(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
+    const { coordinates, fetchCoordinates, error: geoError } = useGoogleGeocoding(import.meta.env.VITE_GOOGLE_MAPS_API_KEY); // Substitua pela sua chave
+
+    // Preenche o formulário com os dados do contato ao receber a prop
+    useEffect(() => {
+        if (contact) {
+            setFormData({
+                nome: contact.nome || '',
+                cpf: contact.cpf || '',
+                telefone: contact.telefone || '',
+                cep: contact.cep || '',
+                endereco: contact.endereco || '',
+                latitude: contact.latitude || '',
+                longitude: contact.longitude || '',
+                complemento: contact.complemento || '',
+            });
+
+            // Busca o endereço baseado no CEP
+            if (contact.cep) {
+                fetchAddress(contact.cep);
+            }
+        }
+    }, [contact, fetchAddress]);
 
     // Atualiza o campo de endereço quando os dados do ViaCep são obtidos
     useEffect(() => {
         if (address.logradouro || address.bairro || address.localidade || address.uf) {
             const enderecoCompleto = `${address.logradouro}, ${address.bairro}, ${address.localidade} - ${address.uf}`;
-            setFormData(prevData => ({ ...prevData, endereco: enderecoCompleto }));
+            // Verifica se o endereço realmente mudou antes de atualizar
+            if (formData.endereco !== enderecoCompleto) {
+                setFormData(prevData => ({ ...prevData, endereco: enderecoCompleto }));
+            }
 
-            // Buscar coordenadas com base no endereço completo
+            // Busca coordenadas com base no endereço completo
             if (address.logradouro && address.bairro && address.localidade && address.uf) {
                 const fullAddress = `${address.logradouro}, ${address.bairro}, ${address.localidade}, ${address.uf}, Brasil`;
                 fetchCoordinates(fullAddress);
             }
         }
-    }, [address]);
+    }, [address, fetchCoordinates, formData.endereco]);
 
     // Atualiza latitude e longitude quando as coordenadas são obtidas
     useEffect(() => {
         if (coordinates.latitude && coordinates.longitude) {
-            setFormData(prevData => ({
-                ...prevData,
-                latitude: coordinates.latitude,
-                longitude: coordinates.longitude,
-            }));
+            // Verifica se as coordenadas realmente mudaram antes de atualizar
+            if (formData.latitude !== coordinates.latitude || formData.longitude !== coordinates.longitude) {
+                setFormData(prevData => ({
+                    ...prevData,
+                    latitude: coordinates.latitude,
+                    longitude: coordinates.longitude,
+                }));
+            }
         }
-    }, [coordinates]);
+    }, [coordinates, formData.latitude, formData.longitude]);
+
+    // Lida com erros de CEP e Geocoding
+    useEffect(() => {
+        if (cepError) {
+            toast.error(cepError);
+        }
+        if (geoError) {
+            toast.error(geoError);
+        }
+    }, [cepError, geoError]);
 
     // Lida com a mudança nos campos do formulário
     const handleChange = (e) => {
@@ -53,39 +92,46 @@ export default function AddContactForm ({ onCancel, onAddContact }) {
             ...prevData,
             [name]: value,
         }));
+
+        // Se o campo alterado for o CEP, buscar o endereço
+        if (name === 'cep') {
+            fetchAddress(value);
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setErrors({});
-    
+
         try {
-            const { data } = await axios.post('/contacts', formData, {
+            const response = await axios.put(`/contacts/${contact.id}`, formData, {
                 headers: { 'Content-Type': 'application/json' },
             });
-    
-            if (data.contact) {
-                onAddContact(data.contact);
+
+            if (response.data.contact) {
+                onUpdateContact(response.data.contact);
                 onCancel();
             } else {
-                setErrors({ form: 'O contato foi criado, mas os dados estão ausentes.' });
+                setErrors({ form: 'O contato foi atualizado, mas os dados estão ausentes.' });
+                toast.error('O contato foi atualizado, mas os dados estão ausentes.');
             }
         } catch (error) {
-            const { errors, error: formError } = error.response?.data || {};
-    
+            const { errors, message } = error.response?.data || {};
             if (errors) {
                 setErrors(errors);
-            } else if (formError) {
-                setErrors({ form: formError });
+                Object.values(errors).forEach(errMsg => toast.error(errMsg));
+            } else if (message) {
+                setErrors({ form: message });
+                toast.error(message);
             } else {
-                setErrors({ form: 'Ocorreu um erro ao adicionar o contato.' });
+                setErrors({ form: 'Ocorreu um erro ao atualizar o contato.' });
+                toast.error('Ocorreu um erro ao atualizar o contato.');
             }
         } finally {
             setLoading(false);
         }
     };
-    
 
     // Lida com o evento de perda de foco no campo CEP para buscar o endereço
     const handleCepBlur = () => {

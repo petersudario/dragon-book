@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreContactRequest;
+use App\Http\Requests\UpdateContactRequest;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,5 +56,36 @@ class ContactController extends Controller
         }
     
         return redirect()->back()->with('success', 'Contato criado com sucesso!');
+    }
+
+     /**
+     * Atualiza um contato existente.
+     */
+    public function update(UpdateContactRequest $request, $id)
+    {
+        $contact = Contact::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        $data = $request->validated();
+
+        $contact->update($data);
+
+        return response()->json([
+            'message' => 'Contato atualizado com sucesso!',
+            'contact' => $contact,
+        ], 200);
+    }
+
+    /**
+     * Exclui um contato existente.
+     */
+    public function destroy($id)
+    {
+        $contact = Contact::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        $contact->delete();
+
+        return response()->json([
+            'message' => 'Contato excluído com sucesso!',
+        ], 200);
     }
 }

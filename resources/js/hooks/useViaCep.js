@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import axios from 'axios';
 
 /**
@@ -20,7 +20,7 @@ const useViaCep = () => {
      *
      * @param {string} cep - O CEP a ser buscado.
      */
-    const fetchAddress = async (cep) => {
+    const fetchAddress = useCallback(async (cep) => {
         try {
             const sanitizedCep = cep.replace(/\D/g, '');
 
@@ -50,7 +50,7 @@ const useViaCep = () => {
             });
             setError(err.message || 'Erro ao buscar o CEP.');
         }
-    };
+    }, []); // Sem dependências, a função é criada uma vez
 
     return { address, fetchAddress, error };
 };

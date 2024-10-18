@@ -1,3 +1,4 @@
+// resources/js/Pages/Dashboard.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
@@ -9,8 +10,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Map from '@/Components/Map';
 import AddContactButton from '@/Components/AddContactButton';
 import AddContactModal from '@/Components/AddContactModal';
-import useGeolocation from '@/hook/UseGeolocation';
-import { Head } from '@inertiajs/react';
+import EditContactModal from '@/Components/EditContactModal';
+import useGeolocation from '@/hooks/UseGeolocation';
 
 const CONTACTS_API_ENDPOINT = '/contacts';
 const DEBOUNCE_DELAY = 500;
@@ -24,7 +25,8 @@ export default function Dashboard() {
   // Estados locais
   const [contacts, setContacts] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -66,9 +68,18 @@ export default function Dashboard() {
     setSelectedContact(contact);
   };
 
-  // Handlers para modal
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  // Handlers para modais
+  const openAddModal = () => setIsAddModalOpen(true);
+  const closeAddModal = () => setIsAddModalOpen(false);
+  
+  const openEditModal = (contact) => {
+    setSelectedContact(contact);
+    setIsEditModalOpen(true);
+  };
+  const closeEditModal = () => {
+    setSelectedContact(null);
+    setIsEditModalOpen(false);
+  };
 
   // Handler para adicionar um novo contato
   const addContact = (newContact) => {
@@ -80,6 +91,36 @@ export default function Dashboard() {
       setTimeout(() => setNotification(prev => ({ ...prev, success: '' })), NOTIFICATION_TIMEOUT);
     } else {
       const errorMessage = 'Contato inválido.';
+      toast.error(errorMessage);
+      setNotification({ success: '', error: errorMessage });
+    }
+  };
+
+  // Handler para atualizar um contato após edição
+  const updateContact = (updatedContact) => {
+    setContacts(prevContacts => prevContacts.map(contact => 
+      contact.id === updatedContact.id ? updatedContact : contact
+    ));
+    const successMessage = 'Contato atualizado com sucesso.';
+    toast.success(successMessage);
+    setNotification({ success: successMessage, error: '' });
+    setTimeout(() => setNotification(prev => ({ ...prev, success: '' })), NOTIFICATION_TIMEOUT);
+  };
+
+  // Handler para excluir um contato
+  const deleteContact = async (contactId) => {
+    const confirmDelete = window.confirm('Tem certeza de que deseja excluir este contato?');
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${CONTACTS_API_ENDPOINT}/${contactId}`);
+      setContacts(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
+      const successMessage = 'Contato excluído com sucesso.';
+      toast.success(successMessage);
+      setNotification({ success: successMessage, error: '' });
+      setTimeout(() => setNotification(prev => ({ ...prev, success: '' })), NOTIFICATION_TIMEOUT);
+    } catch (err) {
+      const errorMessage = 'Erro ao excluir o contato.';
       toast.error(errorMessage);
       setNotification({ success: '', error: errorMessage });
     }
@@ -116,8 +157,6 @@ export default function Dashboard() {
 
   return (
     <AuthenticatedLayout>
-        <Head title="Dashboard" />
-
       <Helmet>
         <title>Dashboard</title>
       </Helmet>
@@ -150,7 +189,7 @@ export default function Dashboard() {
             {loading && <p className="text-sm text-gray-500">Buscando...</p>}
           </div>
 
-          <AddContactButton onClick={openModal} />
+          <AddContactButton onClick={openAddModal} />
 
           <ul className="mt-4">
             {contacts.length > 0 ? (
@@ -164,13 +203,39 @@ export default function Dashboard() {
                   }`}
                   onClick={() => handleSelectContact(contact)}
                 >
-                  <p className="font-bold">{contact.nome}</p>
-                  <p className="text-sm text-gray-600">CPF: {contact.cpf}</p>
-                  <p className="text-sm text-gray-600">Telefone: {contact.telefone}</p>
-                  <p className="text-sm text-gray-600">Endereço: {contact.endereco}</p>
-                  <p className="text-sm text-gray-600">
-                    Complemento: {contact.complemento || 'Nenhum complemento'}
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">{contact.nome}</p>
+                      <p className="text-sm text-gray-600">CPF: {contact.cpf}</p>
+                      <p className="text-sm text-gray-600">Telefone: {contact.telefone}</p>
+                      <p className="text-sm text-gray-600">Endereço: {contact.endereco}</p>
+                      <p className="text-sm text-gray-600">
+                        Complemento: {contact.complemento || 'Nenhum complemento'}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      {/* Botão de Editar */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Evita a seleção do contato ao clicar no botão
+                          openEditModal(contact);
+                        }}
+                        className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                      >
+                        Editar
+                      </button>
+                      {/* Botão de Excluir */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Evita a seleção do contato ao clicar no botão
+                          deleteContact(contact.id);
+                        }}
+                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Excluir
+                      </button>
+                    </div>
+                  </div>
                 </li>
               ))
             ) : (
@@ -178,6 +243,7 @@ export default function Dashboard() {
             )}
           </ul>
 
+          {/* Paginação */}
           <div className="flex justify-between items-center mt-4">
             <button
               onClick={() => handlePageChange(pagination.currentPage - 1)}
@@ -215,12 +281,20 @@ export default function Dashboard() {
         </main>
       </div>
 
+      {/* Modal de Adição de Contato */}
       <AddContactModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
+        isOpen={isAddModalOpen}
+        onClose={closeAddModal}
         onAddContact={addContact}
+      />
+
+      {/* Modal de Edição de Contato */}
+      <EditContactModal
+        isOpen={isEditModalOpen}
+        onClose={closeEditModal}
+        contact={selectedContact}
+        onUpdateContact={updateContact}
       />
     </AuthenticatedLayout>
   );
 };
-
