@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import useViaCep from '@/hook/UseViaCep';
-import useGoogleGeocoding from '@/hook/UseGoogleGeocoding';
+import useViaCep from '@/hooks/useViaCep';
+import useGoogleGeocoding from '@/hooks/useGoogleGeocoding';
 import InputMask from 'react-input-mask'; 
 
 export default function AddContactForm ({ onCancel, onAddContact }) {
@@ -19,7 +19,7 @@ export default function AddContactForm ({ onCancel, onAddContact }) {
     const [loading, setLoading] = useState(false);
 
     const { address, fetchAddress, error: cepError } = useViaCep();
-    const { coordinates, fetchCoordinates, error: geoError } = useGoogleGeocoding();
+    const { coordinates, fetchCoordinates, error: geoError } = useGoogleGeocoding(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
 
     // Atualiza o campo de endereço quando os dados do ViaCep são obtidos
     useEffect(() => {
