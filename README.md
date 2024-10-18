@@ -23,18 +23,23 @@ cd dragon-book
 ```
 
 
-### 2. Instale a vendor.
+### 2. Inicie o container do Docker. Após a build, inicie o terminal do container "app".
 
 ```bash
-composer install
+docker-compose up -d --build
+docker-compose exec app bash
 ```
-### 3. Instale a node_modules.
+
+### 3. Instale a node_modules e a vendor no container.
 
 ```bash
 npm install
+composer install
 ```
 
+
 ### 4. Copie e renomeie o arquivo ".env.example" para ".env" na root do projeto e altere as seguintes linhas para as configurações necessárias:
+Certifique-se de ter a porta 3306 liberada em seu computador. Caso não puder, troque a configuração de porta do container no docker-compose.yml para "3307:3306".
 
 ```bash
 DB_CONNECTION=mysql
@@ -43,16 +48,16 @@ DB_PORT=3306
 DB_DATABASE=laravel
 DB_USERNAME=root
 DB_PASSWORD=root
+
+VITE_GOOGLE_MAPS_API_KEY=Sua chave de API da Google Maps
+GOOGLE_MAPS_API_KEY=Sua chave de API da Google Maps
 ```
 
-
-### 5. Inicie o container do Docker. Após a build, inicie o terminal do container "app".
+### 5. Realize o seguintes comando do npm:
 
 ```bash
-docker-compose up -d --build
-docker-compose exec app bash
+npm run build
 ```
-
 
 ### 6. Realize os seguintes comandos do artisan:
 
