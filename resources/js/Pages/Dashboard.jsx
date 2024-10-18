@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head } from '@inertiajs/react';
+import { Helmet } from 'react-helmet'; 
+import { ToastContainer, toast } from 'react-toastify';
 import Map from '@/Components/Map';
 import useGeolocation from '@/hook/UseGeolocation';
 import AddContactButton from '@/Components/AddContactButton';
 import AddContactModal from '@/Components/AddContactModal';
 import debounce from 'lodash/debounce';
 import axios from 'axios';
-import { Helmet } from 'react-helmet'; 
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function Dashboard() { 
@@ -104,6 +105,8 @@ export default function Dashboard() {
 
     return (
         <AuthenticatedLayout>
+            <Head title="Dashboard" />
+
             <Helmet>
                 <title>Dashboard</title>
             </Helmet>
