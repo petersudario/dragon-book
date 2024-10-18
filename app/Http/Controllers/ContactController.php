@@ -16,10 +16,8 @@ class ContactController extends Controller
      */
     public function index(Request $request)
     {
-        // Inicia a consulta dos contatos do usuário autenticado
         $query = Auth::user()->contacts();
 
-        // Aplica o filtro de busca se o parâmetro 'search' estiver presente
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('nome', 'like', "%{$search}%")
@@ -27,15 +25,13 @@ class ContactController extends Controller
             });
         }
 
-        // Adiciona a ordenação alfabética pelo nome
-        $query->orderBy('nome', 'asc');
+        $contacts = $query->orderBy('nome', 'asc')->paginate(10);
 
-        // Executa a consulta para obter os contatos
-        $contacts = $query->get();
-
-        // Retorna a resposta em formato JSON com os contatos ordenados
         return response()->json([
-            'contacts' => $contacts,
+            'contacts' => $contacts->items(),
+            'current_page' => $contacts->currentPage(),
+            'last_page' => $contacts->lastPage(),
+            'total' => $contacts->total(),
             'search' => $search ?? '',
         ]);
     }
