@@ -23,7 +23,6 @@ const useGoogleGeocoding = (googleApiKey) => {
                 longitude: response.data.longitude,
                 latitude: response.data.latitude
             })
-            console.log("Coordenadas: " + coordinates.latitude + coordinates.longitude)
 
         } catch (error) {
             console.error('Erro ao buscar coordenadas:', error);
