@@ -26,8 +26,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('contacts', ContactController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
-
+    Route::get('/contacts', [ContactController::class, 'index']);
+    Route::post('/contacts', [ContactController::class, 'store']);
+    
     Route::post('/geocode', [GeocodeController::class, 'getCoordinates']);
 });
 
